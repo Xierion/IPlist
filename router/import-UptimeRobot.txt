@@ -9,7 +9,7 @@
 # Policy needed: ftp,read,write,policy,test
 
 # ======================= CONFIG =======================
-:local url "https://raw.githubusercontent.com/Xierion/iplist/main/uptimerobot.rsc"
+:local url "https://raw.githubusercontent.com/Xierion/iplist/main/lists/uptimerobot.rsc"
 :local listName "UptimeRobot"
 :local minBytes 2000
 :local checkCert "yes-without-crl"

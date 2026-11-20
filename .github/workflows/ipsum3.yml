@@ -35,18 +35,19 @@ jobs:
             exit 1
           fi
 
+          mkdir -p lists
           {
             echo "# ipsum level 3, ${COUNT} entries"
             echo "/ip firewall address-list"
             echo "remove [find list=${LIST} comment~\"^auto-updated on\"]"
             awk -v l="$LIST" -v d="$(date -u +%F)" '{printf "add list=%s address=%s comment=\"auto-updated on %s\"\n", l, $1, d}' ips.txt
-          } > ipsum3.rsc
+          } > lists/ipsum3.rsc
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ipsum3.rsc
+          git add lists/ipsum3.rsc
           if git diff --cached --quiet; then
             echo "No change"
           else

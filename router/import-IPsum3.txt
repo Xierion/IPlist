@@ -9,7 +9,7 @@
 # Policy needed: ftp,read,write,policy,test
 
 # ======================= CONFIG =======================
-:local url "https://raw.githubusercontent.com/Xierion/iplist/main/ipsum3.rsc"
+:local url "https://raw.githubusercontent.com/Xierion/iplist/main/lists/ipsum3.rsc"
 :local listName "Blacklist"
 :local minBytes 100000
 :local checkCert "yes-without-crl"
