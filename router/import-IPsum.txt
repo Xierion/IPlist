@@ -1,4 +1,4 @@
-# import-IPsum3
+# import-IPsum
 # Downloads a RouterOS .rsc built by the GitHub Actions in this repo and imports it.
 # The .rsc itself decides which address-list is changed (it removes its own
 # "auto-updated on ..." entries, then adds the fresh list); other entries in the
@@ -9,8 +9,8 @@
 # Policy needed: ftp,read,write,policy,test
 
 # ======================= CONFIG =======================
-:local url "https://raw.githubusercontent.com/Xierion/iplist/main/lists/ipsum3.rsc"
-:local listName "IPsum3"
+:local url "https://raw.githubusercontent.com/Xierion/iplist/main/lists/ipsum.rsc"
+:local listName "IPsum"
 :local minBytes 100000
 :local checkCert "yes-without-crl"
 # ======================================================
