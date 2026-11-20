@@ -2,7 +2,7 @@ name: ipsum
 
 on:
   schedule:
-    - cron: "17 0 * * *"   # daily, 00:17 UTC (~10:47 Adelaide in summer, 09:47 in winter)
+    - cron: "0 0 * * *"   # daily, 00:00 UTC (~10:30 Adelaide in summer, 09:30 in winter)
   workflow_dispatch:
 
 permissions:
