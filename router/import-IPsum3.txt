@@ -1,4 +1,4 @@
-# import-list
+# import-IPsum3
 # Downloads a RouterOS .rsc built by the GitHub Actions in this repo and imports it.
 # The .rsc itself decides which address-list is changed (it removes its own
 # "auto-updated on ..." entries, then adds the fresh list); other entries in the
