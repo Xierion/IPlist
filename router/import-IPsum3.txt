@@ -10,7 +10,7 @@
 
 # ======================= CONFIG =======================
 :local url "https://raw.githubusercontent.com/Xierion/iplist/main/lists/ipsum3.rsc"
-:local listName "Blacklist"
+:local listName "IPsum3"
 :local minBytes 100000
 :local checkCert "yes-without-crl"
 # ======================================================
