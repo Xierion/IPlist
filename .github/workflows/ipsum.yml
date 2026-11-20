@@ -1,0 +1,57 @@
+name: ipsum
+
+on:
+  schedule:
+    - cron: "17 2 * * *"   # daily, 02:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build blacklist.rsc
+        env:
+          LEVEL: "3"          # ipsum level: 1 = largest list ... 8 = smallest
+          LIST: "Blacklist"   # RouterOS address-list name
+          TAG: "ipsum"        # comment on managed entries (only these are removed)
+          MIN_ENTRIES: "1000" # abort if the feed looks broken
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/stamparm/ipsum/master/levels/${LEVEL}.txt" -o in.txt
+
+          OCT='(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])'
+          # valid IPv4 only, drop private/loopback/zero ranges, de-duplicate
+          grep -E "^${OCT}\.${OCT}\.${OCT}\.${OCT}\$" in.txt \
+            | grep -Ev '^(0\.|10\.|127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)' \
+            | sort -u -t. -k1,1n -k2,2n -k3,3n -k4,4n > ips.txt
+
+          COUNT=$(wc -l < ips.txt)
+          echo "valid entries: $COUNT"
+          if [ "$COUNT" -lt "$MIN_ENTRIES" ]; then
+            echo "Too few entries, aborting" >&2
+            exit 1
+          fi
+
+          {
+            echo "# ipsum level ${LEVEL}, ${COUNT} entries"
+            echo "/ip firewall address-list"
+            echo "remove [find list=${LIST} comment=${TAG}]"
+            awk -v l="$LIST" -v c="$TAG" '{printf "add list=%s address=%s comment=%s\n", l, $1, c}' ips.txt
+          } > blacklist.rsc
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add blacklist.rsc
+          if git diff --cached --quiet; then
+            echo "No change"
+          else
+            git commit -m "Update blacklist.rsc"
+            git push
+          fi
