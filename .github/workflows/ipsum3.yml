@@ -1,0 +1,52 @@
+name: ipsum3
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ipsum3.rsc
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/stamparm/ipsum/master/levels/3.txt" -o in.txt
+
+          OCT='(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])'
+          # valid IPv4 only, drop private/loopback/zero ranges, de-duplicate
+          grep -E "^${OCT}\.${OCT}\.${OCT}\.${OCT}\$" in.txt \
+            | grep -Ev '^(0\.|10\.|127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)' \
+            | sort -u -t. -k1,1n -k2,2n -k3,3n -k4,4n > ips.txt
+
+          COUNT=$(wc -l < ips.txt)
+          echo "valid entries: $COUNT"
+          if [ "$COUNT" -lt 1000 ]; then
+            echo "Too few entries, aborting" >&2
+            exit 1
+          fi
+
+          {
+            echo "# ipsum level 3, ${COUNT} entries"
+            echo "/ip firewall address-list"
+            echo "remove [find list=Blacklist comment=ipsum3]"
+            awk '{printf "add list=Blacklist address=%s comment=ipsum3\n", $1}' ips.txt
+          } > ipsum3.rsc
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ipsum3.rsc
+          if git diff --cached --quiet; then
+            echo "No change"
+          else
+            git commit -m "Update ipsum3.rsc"
+            git push
+          fi
