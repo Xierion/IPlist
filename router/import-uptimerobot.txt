@@ -1,0 +1,53 @@
+# import-list
+# Downloads a RouterOS .rsc built by the GitHub Actions in this repo and imports it.
+# The .rsc itself decides which address-list is changed (it removes its own
+# "auto-updated on ..." entries, then adds the fresh list); other entries in the
+# same list are untouched.
+#
+# USAGE: copy this script once per list, change ONLY the CONFIG block, and
+# schedule each copy (after the workflow has run).
+# Policy needed: ftp,read,write,policy,test
+
+# ======================= CONFIG =======================
+:local url "https://raw.githubusercontent.com/Xierion/iplist/main/uptimerobot.rsc"
+:local listName "UptimeRobot"
+:local minBytes 2000
+:local checkCert "yes-without-crl"
+# ======================================================
+
+# temp filename = last part of the URL (e.g. ipsum3.rsc)
+:local f $url
+:local p [:find $f "/"]
+:while ([:typeof $p] != "nil") do={
+    :set f [:pick $f ($p + 1) [:len $f]]
+    :set p [:find $f "/"]
+}
+
+:local logp ("import-list[" . $listName . "]: ")
+
+:do { /file remove [/file find name=$f] } on-error={}
+
+:local fetched true
+:do {
+    /tool fetch url=$url dst-path=$f check-certificate=$checkCert
+} on-error={ :set fetched false }
+
+:if (!$fetched) do={
+    :log error ($logp . "ABORTED - download failed. List left unchanged.")
+    :error "download failed"
+}
+:delay 2s
+
+:local size 0
+:do { :set size [/file get [/file find name=$f] size] } on-error={}
+:if ($size < $minBytes) do={
+    :log error ($logp . "ABORTED - file is only " . $size . " bytes (expected at least " . $minBytes . "). List left unchanged.")
+    :do { /file remove [/file find name=$f] } on-error={}
+    :error "file too small"
+}
+
+:log info ($logp . "importing " . $f . " (" . $size . " bytes)")
+/import file-name=$f
+:do { /file remove [/file find name=$f] } on-error={}
+
+:log info ($logp . "SUCCESS - " . $listName . " now has " . [:len [/ip firewall address-list find where list=$listName]] . " entries")
