@@ -51,5 +51,6 @@ jobs:
             echo "No change"
           else
             git commit -m "Update ipsum3.rsc"
+            git pull --rebase
             git push
           fi
