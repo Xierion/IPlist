@@ -17,7 +17,7 @@ jobs:
       - name: Build ipsum.rsc
         env:
           LIST: "IPsum"   # RouterOS address-list name
-          URL: "https://raw.githubusercontent.com/stamparm/ipsum/master/levels/3.txt"
+          URL: "https://raw.githubusercontent.com/stamparm/ipsum/master/levels/5.txt"
         run: |
           set -euo pipefail
           curl -fsSL "$URL" -o in.txt
