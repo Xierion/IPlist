@@ -46,8 +46,7 @@
     :error "file too small"
 }
 
-:log info ($logp . "importing " . $f . " (" . $size . " bytes)")
 /import file-name=$f
 :do { /file remove [/file find name=$f] } on-error={}
 
-:log info ($logp . "SUCCESS - " . $listName . " now has " . [:len [/ip firewall address-list find where list=$listName]] . " entries")
+:log info ($logp . "OK - " . $size . " bytes imported, list now has " . [:len [/ip firewall address-list find where list=$listName]] . " entries")
